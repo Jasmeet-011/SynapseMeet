@@ -1,0 +1,38 @@
+"""Auth state store — Zustand."""
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
+interface AuthState {
+  token: string | null;
+  user: User | null;
+  isAuthenticated: boolean;
+  setAuth: (token: string, user: User) => void;
+  logout: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      token: null,
+      user: null,
+      isAuthenticated: false,
+      setAuth: (token, user) => {
+        localStorage.setItem("synapsemeet_token", token);
+        set({ token, user, isAuthenticated: true });
+      },
+      logout: () => {
+        localStorage.removeItem("synapsemeet_token");
+        set({ token: null, user: null, isAuthenticated: false });
+      },
+    }),
+    { name: "synapsemeet_auth" }
+  )
+);
